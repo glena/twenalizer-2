@@ -25,7 +25,7 @@ if (Meteor.isServer) {
           Fiber( function() {
             console.log('TWEET RECEIVED');
             
-            if (data.coordinates !== null || data.user.location != '') {
+            if (data.coordinates !== null /*|| data.user.location != ''*/) {
               Tweets.insert(data);
             }
             
