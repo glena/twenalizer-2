@@ -1,0 +1,16 @@
+<head>
+  <title>twenalizer2</title>
+</head>
+
+<body>
+  {{> tweets}}
+</body>
+
+<template name="tweets">
+  <h1>Tweets</h1>
+  <ul>
+    {{#each tweets}}
+      <li>{{text}}</li>
+    {{/each}}
+  </ul>
+</template>
