@@ -18,71 +18,73 @@ var RealWidth = 0
       , lat_tz = null
       , svg = null;
 
-Template.tweets.rendered = function () {
-  
-  var self = this;
-  self.node = self.find("svg");
+Meteor.subscribe('tweets');
 
-  if (! self.handle) {
-    self.handle = Deps.autorun(function () {
-
-      d3.selection.prototype.moveToFront = function() {
+d3.selection.prototype.moveToFront = function() {
           return this.each(function(){
               this.parentNode.appendChild(this);
           });
       };
-      
-      svgEl = d3.select(self.node);
-      svg = svgEl.append('g');
 
-      resizeGraph();
-      
-      projection = d3.geo.mercator()
-          .scale(135 * height / 847)
-          .translate([width / 2, height / 2]);
-      
-      path = d3.geo.path().projection(projection);
-      
-      lat_tz = d3.range(-180,180,15).map(function (lat){
-          var tz = Math.floor(lat / 15)+1;
-          var from = projection([lat,0]);
-          var to = projection([lat+15,0]);
-          return {
-              tz: tz,
-              latitude: lat,
-              width: to[0] - from[0],
-              x: from[0]
-          };
-      });
-      
-      d3.json("world.json", function(error, world) {
-          svg.append("path")
-              .classed('world', true)
-              .datum( topojson.feature(world, world.objects.land) )
-              .attr("d", path);
-      
-          var night = svg.append("path")
-            .attr("class", "night")
-            .attr("d", path);
-      
-          redraw();
-          setInterval(redraw, 5 * 60 * 1000);
-      
-          function redraw() {
-              night.datum(circle.origin(antipode(solarPosition(new Date)))).attr("d", path);
-              setTimeZone();
-          }
-          
-          renderData();
-          
-      });
-      
-      window.onresize = resizeGraph;
-      // Equations based on NOAA’s Solar Calculator; all angles in radians.
-      // http://www.esrl.noaa.gov/gmd/grad/solcalc/
+Template.tweets.rendered = function () {
+    
+  var self = this;
+  self.node = self.find("svg");
   
-   });
-  }
+  
+  svgEl = d3.select(self.node);
+svg = svgEl.append('g');
+
+resizeGraph();
+  
+  projection = d3.geo.mercator()
+      .scale(135 * height / 847)
+      .translate([width / 2, height / 2]);
+  
+  path = d3.geo.path().projection(projection);
+  
+  lat_tz = d3.range(-180,180,15).map(function (lat){
+      var tz = Math.floor(lat / 15)+1;
+      var from = projection([lat,0]);
+      var to = projection([lat+15,0]);
+      return {
+          tz: tz,
+          latitude: lat,
+          width: to[0] - from[0],
+          x: from[0]
+      };
+  });
+  d3.json("world.json", function(error, world) {
+      svg.append("path")
+          .classed('world', true)
+          .datum( topojson.feature(world, world.objects.land) )
+          .attr("d", path);
+  
+      var night = svg.append("path")
+        .attr("class", "night")
+        .attr("d", path);
+  
+      redraw();
+      setInterval(redraw, 5 * 60 * 1000);
+  
+      function redraw() {
+          night.datum(circle.origin(antipode(solarPosition(new Date)))).attr("d", path);
+          setTimeZone();
+      }
+      
+      if (! self.handle) {
+        self.handle = Deps.autorun(function () {
+    
+          renderData();
+            
+       });
+      }
+      
+  });
+  
+  window.onresize = resizeGraph;
+  // Equations based on NOAA’s Solar Calculator; all angles in radians.
+  // http://www.esrl.noaa.gov/gmd/grad/solcalc/ 
 
 };
 
@@ -117,16 +119,16 @@ function resizeGraph(){
 
 function renderData()
 {
-    data = Tweets.find().fetch();
-    console.log(data);
-    data.forEach(function(tweet){
+    console.log('loading tweets in map');
+    
+    /*data.forEach(function(tweet){
       console.log(tweet.coordinates.coordinates);
       tweet.position = projection(tweet.coordinates.coordinates);
       console.log(tweet.position);
-	});
-    console.log(data);
+	});*/
+    console.log(Tweets.find().fetch());
   
-	var circles = svg.selectAll("circle").data(data, function (party) { return party._id; });
+	var circles = svg.selectAll("circle").data(Tweets.find().fetch(), function (tweet) { return tweet._id; });
 
     var timeLimit = new Date();
     var timeLimit1 = (new Date()).setMinutes(timeLimit.getMinutes() - 20);
@@ -144,20 +146,28 @@ function renderData()
         .remove();
 
     circles
-        .attr("cx", function(d) { return d.position[0]; })
+        .attr("cx", function(d) {
+          
+          console.log(d.coordinates.coordinates);
+          d.position = projection(d.coordinates.coordinates);
+          console.log(d.position);
+          
+          return d.position[0];
+        })
         .attr("cy", function(d) { return d.position[1]; })
         .attr("fill-opacity", function(t){
-            if (t.created_at < timeLimit6) return 0.1;
+            /*if (t.created_at < timeLimit6) return 0.1;
 			if (t.created_at < timeLimit5) return 0.2;
 			if (t.created_at < timeLimit4) return 0.3;
 			if (t.created_at < timeLimit3) return 0.5;
 			if (t.created_at < timeLimit2) return 0.7;
 			if (t.created_at < timeLimit1) return 0.8;
-			return 0.9;
+			return 0.9;*/
+            return 1;
         })
         .attr("r", function(t){
-			if (t.created_at < timeLimit4) return 5;
-			if (t.created_at < timeLimit2) return 4;
+			//if (t.created_at < timeLimit4) return 5;
+			//if (t.created_at < timeLimit2) return 4;
 			return 3;
         });
       
@@ -165,6 +175,8 @@ function renderData()
 
 function setTimeZone()
 {
+  return;
+
 	var now = new Date();
 
 	lat_tz.forEach(function(d) {

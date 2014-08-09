@@ -1,2 +1,0 @@
-https://github.com/meteor/meteor/blob/devel/examples/parties/.meteor/packages
-https://github.com/meteor/meteor/blob/devel/examples/parties/client/client.js

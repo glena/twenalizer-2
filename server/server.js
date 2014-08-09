@@ -1,10 +1,17 @@
-if (Meteor.isServer) { 
+if (Meteor.isServer) {
+  Meteor.publish('tweets', function(){
+      return Tweets.find();
+  });
+  
   Meteor.startup(function () {
   
     console.log('APP INIT');
   
     var Twitter = Meteor.require("twitter");
     var Fiber = Meteor.require('fibers');
+    var fs = Meteor.require('fs');
+
+
         
     var conf = JSON.parse(Assets.getText('twitter.json'));
         
@@ -18,15 +25,24 @@ if (Meteor.isServer) {
     console.log('CONNECTING TWITTER');
         
     twit.stream('statuses/filter', {
-        'track': 'Pintos'
+        'track': 'Irak'
     }, function(stream) {
         stream.on('data', function(data) {
           
           Fiber( function() {
-            console.log('TWEET RECEIVED');
-            
+                
+            fs.writeFile("/home/german/Projects/twenalizer2/tweets.log", "\n");
+            fs.writeFile("/home/german/Projects/twenalizer2/tweets.log", JSON.stringify(data)); 
+                        
             if (data.coordinates !== null /*|| data.user.location != ''*/) {
+              
+              console.log('TWEET RECEIVED VALID');
+              
               Tweets.insert(data);
+            }
+            else
+            {
+              //console.log('TWEET RECEIVED INVALID');
             }
             
           }).run();
