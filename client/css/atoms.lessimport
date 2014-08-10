@@ -1,0 +1,24 @@
+.tweets-list{
+  overflow: auto;
+  width: 400px;
+}
+.right {
+  float:right;
+}
+.left {
+  float:left;
+}
+.about {
+  width: 390px;
+  padding: 0 5px;
+}
+.night {
+  stroke: #000000;
+  fill: #000000;
+  fill-opacity: .6;
+}
+.opensource {
+  clear: both;
+  padding: 10px;
+  text-align: center;
+}

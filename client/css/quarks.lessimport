@@ -1,0 +1,31 @@
+body{
+  margin:0;
+  /*font: normal 14px/1.5  'Roboto Condensed', sans-serif;*/
+  font: normal 12px/1.5  sans-serif;
+  margin:0;
+}
+h1 {
+	font-size: 15px;
+	line-height: 30px;
+	margin: 0;
+}
+h2 {
+	font-size: 15px;
+	line-height: 20px;
+	margin: 0;
+}
+a,
+a:hover,
+a:visited{
+	color:#FF0085;
+	text-decoration: underline;
+}
+ul {
+  margin:0;
+  padding:0;
+  list-style: none;
+  
+  li {
+    padding: 10px 0;
+  }
+}

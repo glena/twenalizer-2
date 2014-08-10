@@ -7,9 +7,22 @@
 </body>
 
 <template name="tweets">
-  <h1>Tweets</h1>
   
-  <div class="map">
+  <div class="left">
+    <div class="about">
+        <h1>Twenalizer - Germán Lena - <a href="http://germanlena.com.ar">http://germanlena.com.ar</a></h1>
+        <h2>Tracking tweets about Venezuela</h2>
+    </div>
+    <div class="tweets-list">
+      <ul>
+        {{#each tweets}}
+          <li>{{text}}</li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+  
+  <div class="map right">
       <svg>
           <defs>
               <radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
@@ -18,18 +31,6 @@
               </radialGradient>
           </defs>
       </svg>
-  </div>
-  
-  <div class="about">
-      <h1>Twenalizer - Germán Lena - <a href="http://germanlena.com.ar">http://germanlena.com.ar</a></h1>
-      <h2>Tracking tweets about Venezuela</h2>
-  </div>
-  <div class="tweets-list">
-    <ul>
-      {{#each tweets}}
-        <li>{{text}}</li>
-      {{/each}}
-    </ul>
   </div>
   
   <div class="opensource">

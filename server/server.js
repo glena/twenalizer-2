@@ -5,13 +5,14 @@ if (Meteor.isServer) {
   
   Meteor.startup(function () {
   
-    console.log('APP INIT');
+    twitterConnection();
+
+  });
   
+  function twitterConnection() { 
     var Twitter = Meteor.require("twitter");
     var Fiber = Meteor.require('fibers');
     var fs = Meteor.require('fs');
-
-
         
     var conf = JSON.parse(Assets.getText('twitter.json'));
         
@@ -25,18 +26,20 @@ if (Meteor.isServer) {
     console.log('CONNECTING TWITTER');
         
     twit.stream('statuses/filter', {
-        'track': 'Irak'
+        'track': 'justin bieber'
     }, function(stream) {
         stream.on('data', function(data) {
           
           Fiber( function() {
                 
-            fs.writeFile("/home/german/Projects/twenalizer2/tweets.log", "\n");
-            fs.writeFile("/home/german/Projects/twenalizer2/tweets.log", JSON.stringify(data)); 
+//            fs.writeFile("/home/german/Projects/twenalizer2/tweets.log", "\n");
+//            fs.writeFile("/home/german/Projects/twenalizer2/tweets.log", JSON.stringify(data)); 
                         
             if (data.coordinates !== null /*|| data.user.location != ''*/) {
               
               console.log('TWEET RECEIVED VALID');
+              
+              data.created_at_date = new Date(data.created_at);
               
               Tweets.insert(data);
             }
@@ -49,6 +52,5 @@ if (Meteor.isServer) {
             
         });
     });
-
-  });
+  }
 }
