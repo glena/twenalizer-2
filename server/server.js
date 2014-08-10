@@ -1,6 +1,7 @@
 if (Meteor.isServer) {
+    
   Meteor.publish('tweets', function(){
-      return Tweets.find();
+    return Tweets.find();
   });
   
   Meteor.startup(function () {
@@ -40,6 +41,8 @@ if (Meteor.isServer) {
               console.log('TWEET RECEIVED VALID');
               
               data.created_at_date = new Date(data.created_at);
+              data.created_at_iso = data.created_at_date.toISOString();
+              data.created_at_stamp = Date.parse(data.created_at);
               
               Tweets.insert(data);
             }

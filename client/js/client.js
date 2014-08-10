@@ -2,9 +2,16 @@ if (Meteor.isClient) {
 
   Meteor.subscribe('tweets');
   
+  function getFilterSinceTimestamp()
+  {
+    var filter = (new Date());
+    filter.setHours(filter.getHours() - 1);
+    return filter;
+  }
+  
   Template.tweets.helpers({
     tweets: function() {
-      return Tweets.find();
+      return Tweets.find({"created_at_stamp": {"$gte": getFilterSinceTimestamp().getTime()}});
     }
   });
   
@@ -124,7 +131,7 @@ if (Meteor.isClient) {
   
   function renderData()
   {  
-      var circles = svg.selectAll("circle").data(Tweets.find().fetch(), function (tweet) { return tweet._id; });
+      var circles = svg.selectAll("circle").data(Tweets.find({"created_at_stamp": {"$gte": getFilterSinceTimestamp().getTime()}}).fetch(), function (tweet) { return tweet._id; });
   
       var timeLimit = new Date();
       var timeLimit1 = (new Date()).setMinutes(timeLimit.getMinutes() - 20);
@@ -154,13 +161,13 @@ if (Meteor.isClient) {
           })
           .attr("cy", function(d) { return d.position[1]; })
           .attr("fill-opacity", function(t){          
-              if (t.created_at_date < timeLimit6) return 0.1;
-              if (t.created_at_date < timeLimit5) return 0.2;
-              if (t.created_at_date < timeLimit4) return 0.3;
+              if (t.created_at_date < timeLimit6) return 0.2;
+              if (t.created_at_date < timeLimit5) return 0.3;
+              if (t.created_at_date < timeLimit4) return 0.4;
               if (t.created_at_date < timeLimit3) return 0.5;
-              if (t.created_at_date < timeLimit2) return 0.7;
-              if (t.created_at_date < timeLimit1) return 0.8;
-              return 0.9;
+              if (t.created_at_date < timeLimit2) return 0.6;
+              if (t.created_at_date < timeLimit1) return 0.7;
+              return 0.8;
           });
         
   }
