@@ -1,16 +1,29 @@
 if (Meteor.isServer) {
-    
-  Meteor.publish('tweets', function(){
-    return Tweets.find();
+   
+  Meteor.publish('datasets', function(){
+    return Datasets.find();
   });
+  
+  Meteor.publish('tweets', function(dataset){
+    
+    console.log('Publishing: ' + dataset);
+    
+    return Tweets.find({ dataset: dataset });
+  });
+   
   
   Meteor.startup(function () {
-  
-    twitterConnection();
-
+    
+    var datasets = Datasets.find().fetch();
+      
+    console.log('INITIALIZE WITH ' + datasets[0].name);
+    
+    twitterConnection(datasets[0].name);
+    
   });
   
-  function twitterConnection() { 
+    
+  function twitterConnection(db) { 
     var Twitter = Meteor.require("twitter");
     var Fiber = Meteor.require('fibers');
     var fs = Meteor.require('fs');
@@ -27,7 +40,7 @@ if (Meteor.isServer) {
     console.log('CONNECTING TWITTER');
         
     twit.stream('statuses/filter', {
-        'track': 'justin bieber'
+        'track': db
     }, function(stream) {
         stream.on('data', function(data) {
           
@@ -43,6 +56,8 @@ if (Meteor.isServer) {
               data.created_at_date = new Date(data.created_at);
               data.created_at_iso = data.created_at_date.toISOString();
               data.created_at_stamp = Date.parse(data.created_at);
+              
+              data.dataset = db;
               
               Tweets.insert(data);
             }

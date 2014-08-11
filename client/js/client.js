@@ -1,19 +1,35 @@
+/*
+ 
+http://docs.meteor.com/#meteor_subscribe
+ 
+ 
+http://stackoverflow.com/questions/10984030/get-meteor-collection-by-name
+https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md
+*/
+
 if (Meteor.isClient) {
 
-  Meteor.subscribe('tweets');
+  Meteor.subscribe('datasets', subscribeTweets);
   
+  function subscribeTweets()
+  {   
+    var data = Datasets.find({}, { item: 1, qty: 1 }).fetch();
+    var tweetsSubscriptionHandler = Meteor.subscribe('tweets', data[0].name);  
+  }
+  
+   
   function getFilterSinceTimestamp()
   {
     var filter = (new Date());
-    filter.setHours(filter.getHours() - 1);
+    filter.setHours(filter.getHours() - 3);
     return filter;
   }
-  
+    
   Template.tweets.helpers({
-    tweets: function() {
-      return Tweets.find({"created_at_stamp": {"$gte": getFilterSinceTimestamp().getTime()}});
-    }
-  });
+      tweets: function() {
+        return Tweets.find({"created_at_stamp": {"$gte": getFilterSinceTimestamp().getTime()}});
+      }
+    });
   
   var RealWidth = 0
     , circle = d3.geo.circle().angle(90)
@@ -151,8 +167,10 @@ if (Meteor.isClient) {
               .attr("fill", "rgb(255,140,0)");
   
       circles.exit().transition()
-          .attr("r", 0)
-          .remove();
+          .attr("r", radio * 2)
+            .transition()
+              .attr("r", 0)
+              .remove();
   
       circles
           .attr("cx", function(d) {
