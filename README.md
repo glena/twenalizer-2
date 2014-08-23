@@ -1,29 +1,28 @@
 Twinalizer-2
 ============
 
-Migración de la primera version de twenalizer (twenalizer-ukraine.germanlena.com.ar) a meteor con nuevas funcionalidades e histórico de tweets.
+Migration of the first version of twinalizer (twenalizer-ukraine.germanlena.com.ar) to MeteorJS with newer and cooler features!
 
-Detalles
+Details
 --------
 
-* Visualización de tweets en real time sobre diversas temáticas
-* Migrado a Meteor para facilitar la interacción en real time
-* Almacena en Mongo los tweets recibidos para almacenar el histórico
+* Real-time tweets visualization, geolocated on a map.
+* First created under vanilla node + socket.io and migrated to Meteor for easy real-time visualizations.
+* Store in MongoDB the received tweets to store an historical archive.
 
-Proximos pasos
---------------
+Next steps
+----------
 
-* Visualización del histórico a medida pasa el tiempo
-* Manejo de multiples streams de tweets (posiblemente implementado sobre una única conexión a twitter, posiblemente limitados)
-* Votación de temas para definir cuales son los que se van a monitorear
-* Posibilidad de sugerir temas
+* Visualization of the archived tweets  within a timeline.
+* Multiple tweets streams handler (probably over the same twitter stream).
+* Stackoverflow-like votes to let the visitors select which stream to monitor.
+* Allow visitors to add new streams to monitor.
 
-Configuración
+Configuration
 -------------
 
-Crear el archivo environment.js (ver ejemplo: environment.js.demo) con el siguiente formato:
-
-Create an app here https://dev.twitter.com/apps and copy your keys as following
+Create the /server/lib/environment.js file.
+Create an app on twitter (https://dev.twitter.com/apps) and copy your keys on your environment file with the following format:
 
 ```
 twitter_conf = {
@@ -37,5 +36,28 @@ twitter_conf = {
     }
 }
 ```
+Startup
+-------
+
+Install Meteor (https://www.meteor.com/)
+```
+$ curl https://install.meteor.com/ | sh
+```
+
+Install Meteorite (http://atmospherejs.com/docs/installing)
+```
+$ npm install -g meteorite
+```
+
+Install dependencies
+```
+$ mrt update
+```
+
+Initialize the server
+```
+$ mrt
+```
+
 
 [![Analytics](https://ga-beacon.appspot.com/UA-51467836-1/glena/twinalizer-2)](http://germanlena.com.ar)
