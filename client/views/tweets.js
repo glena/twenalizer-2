@@ -10,9 +10,13 @@ var RealWidth = 0
   , projection = null
   , svgEl = null
   , path = null
-  , lat_tz = null
   , svg = null;
 
+/*
+  Used to filter the tweets to show in the map. Just the tweets of the last 3
+  hours. Need to check, not sure if it is working fine (maybe need to be
+  filtered serverside when publishing)
+*/
 function getFilterSinceTimestamp()
 {
   var filter = (new Date());
@@ -20,12 +24,18 @@ function getFilterSinceTimestamp()
   return filter;
 }
 
+/*
+  Loads the tweets list
+*/
 Template.tweets.helpers({
   tweets: function() {
     return Tweets.find({"created_at_stamp": {"$gte": getFilterSinceTimestamp().getTime()}});
   }
 });
 
+/*
+  D3 helper to move elements on top of the others
+*/
 d3.selection.prototype.moveToFront = function() {
     return this.each(function(){
         this.parentNode.appendChild(this);
@@ -37,46 +47,61 @@ Template.tweets.rendered = function () {
   var self = this;
   self.node = self.find("svg");
 
-
   svgEl = d3.select(self.node);
   svg = svgEl.append('g');
 
+  /*
+    Size the graph to fit
+  */
   resizeGraph();
 
+  /*
+    Initialize the projection. We will user mercator, not the best (didn't
+    respect the real proportions but good enough to show the tweets in the best
+    way).
+
+    The scale constants is some magic numbers to calculate the width (based on
+    the topojson ratio).
+  */
   projection = d3.geo.mercator()
       .scale(135 * height / 847)
       .translate([width / 2, height / 2]);
 
   path = d3.geo.path().projection(projection);
 
-  lat_tz = d3.range(-180,180,15).map(function (lat){
-      var tz = Math.floor(lat / 15)+1;
-      var from = projection([lat,0]);
-      var to = projection([lat+15,0]);
-      return {
-          tz: tz,
-          latitude: lat,
-          width: to[0] - from[0],
-          x: from[0]
-      };
-  });
   d3.json("world.json", function(error, world) {
+
+      /*
+        Loads the world topojson and create the path
+      */
       svg.append("path")
           .classed('world', true)
           .datum( topojson.feature(world, world.objects.land) )
           .attr("d", path);
 
+      /*
+        this is the path that shows the night over the globe
+      */
       var night = svg.append("path")
         .attr("class", "night")
         .attr("d", path);
 
+      /*
+        Draw the night and sets an interval to update the night position over
+        time.
+      */
       redraw();
       setInterval(redraw, 5 * 60 * 1000);
 
       function redraw() {
-          night.datum(circle.origin(antipode(solarPosition(new Date)))).attr("d", path);
+          night.datum(circle
+                        .origin(antipode(solarPosition(new Date))))
+              .attr("d", path);
       }
 
+      /*
+        Loads the data on the map and updates it when it changes
+      */
       if (! self.handle) {
         self.handle = Deps.autorun(function () {
 
@@ -87,13 +112,17 @@ Template.tweets.rendered = function () {
 
   });
 
+  /*
+    when the window size changes, will update the graph size to ensure
+    responsiveness
+  */
   window.onresize = resizeGraph;
-
-
 };
 
-
-
+/*
+  The first time will calculate the graph size.
+  The next time will resize the svg element and scale the content to fit.
+*/
 function resizeGraph(){
     realWidth = document.body.clientWidth;
     width = realWidth - 420;
@@ -125,9 +154,19 @@ function resizeGraph(){
     radio = width * 0.7 / 100;
 }
 
+/*
+  Loads the data from the database and makes the D3 joins to add, update and
+  remove the data.
+  Also, some time limits to calculate the opacity.
+*/
 function renderData()
 {
-    var circles = svg.selectAll("circle").data(Tweets.find({"created_at_stamp": {"$gte": getFilterSinceTimestamp().getTime()}}).fetch(), function (tweet) { return tweet._id; });
+    var circles = svg
+      .selectAll("circle")
+        .data(Tweets.find({
+                created_at_stamp: {"$gte": getFilterSinceTimestamp().getTime()}
+                })
+                .fetch(), function (tweet) { return tweet._id; });
 
     var timeLimit = new Date();
     var timeLimit1 = (new Date()).setMinutes(timeLimit.getMinutes() - 20);
@@ -154,6 +193,13 @@ function renderData()
 
     circles
         .attr("cx", function(d) {
+          /*
+            This calculates the position of the circles on the map applying the
+            projection. Not sure if it is better to make it here (I think not)
+            but I don't like to make a foreach before loading the tweets. Maybe
+            add the method to the model, but how to work with the projection
+            as long as this is not defined on the server.
+          */
           d.position = projection(d.coordinates.coordinates);
           return d.position[0];
         })
@@ -170,8 +216,16 @@ function renderData()
 
 }
 
-// Equations based on NOAA’s Solar Calculator; all angles in radians.
-// http://www.esrl.noaa.gov/gmd/grad/solcalc/
+/*
+  From here it is some kind of black magic.
+  This calculates the position and the way that the night is shown and loads the
+  path.
+
+  Equations based on NOAA’s Solar Calculator; all angles in radians.
+  http://www.esrl.noaa.gov/gmd/grad/solcalc/
+
+  BEGIN OF MAGIC 
+*/
 
 function antipode(position) {
   return [position[0] + 180, -position[1]];
@@ -238,3 +292,4 @@ function meanObliquityOfEcliptic(centuries) {
 function eccentricityEarthOrbit(centuries) {
   return 0.016708634 - centuries * (0.000042037 + 0.0000001267 * centuries);
 }
+/* END OF MAGIC */

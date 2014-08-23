@@ -1,13 +1,9 @@
 /*
-
-http://docs.meteor.com/#meteor_subscribe
-
-http://stackoverflow.com/questions/10122977/what-are-the-best-practices-for-structuring-a-large-meteor-app-with-many-html-te
-
-http://stackoverflow.com/questions/10984030/get-meteor-collection-by-name
-https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md
+  The client will subscribe to the databases, and once it is loaded will
+    subscribe to the tweets dataset related to the first one (in the future
+    it will need to populate a menu and subscribe to the dataset selected by
+    the user)
 */
-
 Meteor.subscribe('datasets', subscribeTweets);
 
 function subscribeTweets()

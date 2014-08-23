@@ -3,6 +3,13 @@ Twinalizer-2
 
 Migration of the first version of twinalizer (twenalizer-ukraine.germanlena.com.ar) to MeteorJS with newer and cooler features!
 
+Technologies
+------------
+
+* MeteorJS
+* D3.JS
+* MongoDB
+
 Details
 --------
 
