@@ -1,0 +1,15 @@
+/*
+Create an app here: https://dev.twitter.com/apps
+and copy your keys
+*/
+
+twitter_conf = {
+    consumer: {
+        key: "YOUR CONSUMER KEY",
+        secret: "YOUR CONSUMER SECRET"
+    },
+    access_token: {
+        key: "YOUR APP KET",
+        secret: "YOUR APP SECRET"
+    }
+}

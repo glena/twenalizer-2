@@ -15,15 +15,13 @@ Meteor.startup(function () {
 function twitterConnection(db) {
   var Twitter = Meteor.require("twitter");
   var Fiber = Meteor.require('fibers');
-  var fs = Meteor.require('fs');
-
-  var conf = JSON.parse(Assets.getText('twitter.json'));
+  //var fs = Meteor.require('fs');
 
   var twit = new Twitter({
-      consumer_key: conf.consumer.key,
-      consumer_secret: conf.consumer.secret,
-      access_token_key: conf.access_token.key,
-      access_token_secret: conf.access_token.secret
+      consumer_key: twitter_conf.consumer.key,
+      consumer_secret: twitter_conf.consumer.secret,
+      access_token_key: twitter_conf.access_token.key,
+      access_token_secret: twitter_conf.access_token.secret
   });
 
   console.log('CONNECTING TWITTER');
