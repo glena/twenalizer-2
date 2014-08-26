@@ -51,7 +51,7 @@ Install Meteor (https://www.meteor.com/)
 $ curl https://install.meteor.com/ | sh
 ```
 
-Install Meteorite (http://atmospherejs.com/docs/installing)
+Install Meteorite (https://github.com/oortcloud/meteorite/)
 ```
 $ npm install -g meteorite
 ```
