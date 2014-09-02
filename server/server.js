@@ -25,7 +25,7 @@ Meteor.startup(function () {
   */
   if (datasets.length == 0) {
     Datasets.insert({
-      name: 'dviz,dataviz,visualization,opendata,open data,open gov' // just to ensure lots of new tweets, this people is crazy!
+      name: 'ukraine' // just to ensure lots of new tweets, this people is crazy!
     });
   }
 

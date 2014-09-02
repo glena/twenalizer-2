@@ -151,7 +151,7 @@ function resizeGraph(){
         svg.attr('transform', 'scale('+ scale +')');
     }
 
-    radio = width * 0.7 / 100;
+    radio = width * 0.5 / 100;
 }
 
 /*
