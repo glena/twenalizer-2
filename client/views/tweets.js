@@ -24,12 +24,27 @@ function getFilterSinceTimestamp()
   return filter;
 }
 
+function getTweets()
+{
+  return Tweets.find({
+    "created_at_stamp": {
+      "$gte": getFilterSinceTimestamp().getTime()
+    }
+  });
+}
+
+
+
 /*
   Loads the tweets list
 */
 Template.tweets.helpers({
   tweets: function() {
-    return Tweets.find({"created_at_stamp": {"$gte": getFilterSinceTimestamp().getTime()}});
+    return getTweets();
+  },
+  dataset: function() {
+    var data = Datasets.find({}, { item: 1, qty: 1 }).fetch();
+    return data[0];
   }
 });
 
@@ -163,18 +178,9 @@ function renderData()
 {
     var circles = svg
       .selectAll("circle")
-        .data(Tweets.find({
-                created_at_stamp: {"$gte": getFilterSinceTimestamp().getTime()}
-                })
-                .fetch(), function (tweet) { return tweet._id; });
+        .data(getTweets().fetch(), function (tweet) { return tweet._id; });
 
-    var timeLimit = new Date();
-    var timeLimit1 = (new Date()).setMinutes(timeLimit.getMinutes() - 20);
-    var timeLimit2 = (new Date()).setMinutes(timeLimit.getMinutes() - 40);
-    var timeLimit3 = (new Date()).setMinutes(timeLimit.getMinutes() - 60);
-    var timeLimit4 = (new Date()).setMinutes(timeLimit.getMinutes() - 80);
-    var timeLimit5 = (new Date()).setMinutes(timeLimit.getMinutes() - 100);
-    var timeLimit6 = (new Date()).setMinutes(timeLimit.getMinutes() - 120);
+    var nowStamp = (new Date()).getTime();
 
     circles.enter().append("circle")
         .attr("fill", "rgb(255,0,0)")
@@ -185,11 +191,8 @@ function renderData()
             .attr("r", radio)
             .attr("fill", "rgb(255,140,0)");
 
-    circles.exit().transition()
-        .attr("r", radio * 2)
-          .transition()
-            .attr("r", 0)
-            .remove();
+    circles.exit()
+        .remove();
 
     circles
         .attr("cx", function(d) {
@@ -205,13 +208,13 @@ function renderData()
         })
         .attr("cy", function(d) { return d.position[1]; })
         .attr("fill-opacity", function(t){
-            if (t.created_at_date < timeLimit6) return 0.2;
-            if (t.created_at_date < timeLimit5) return 0.3;
-            if (t.created_at_date < timeLimit4) return 0.4;
-            if (t.created_at_date < timeLimit3) return 0.5;
-            if (t.created_at_date < timeLimit2) return 0.6;
-            if (t.created_at_date < timeLimit1) return 0.7;
-            return 0.8;
+            
+            /*
+              Calculates the opacity as a percentaje of the age of the tweet over it lifetime (3 hours).
+            */
+          
+            return 1 - ((nowStamp - t.created_at_stamp) / (180 * 60 * 1000));
+
         });
 
 }
