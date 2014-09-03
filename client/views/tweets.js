@@ -1,5 +1,4 @@
-var RealWidth = 0
-  , circle = d3.geo.circle().angle(90)
+var circle = d3.geo.circle().angle(90)
   , width = null
   , originalWidth = null
   , height = 0
@@ -32,8 +31,6 @@ function getTweets()
     }
   });
 }
-
-
 
 /*
   Loads the tweets list
@@ -120,7 +117,10 @@ Template.tweets.rendered = function () {
       if (! self.handle) {
         self.handle = Deps.autorun(function () {
 
-          renderData();
+          renderData(getTweets().fetch());
+
+          //d3.select(window)
+          svg.on("mousemove", mousemove);
 
        });
       }
@@ -134,24 +134,37 @@ Template.tweets.rendered = function () {
   window.onresize = resizeGraph;
 };
 
+function mousemove() {
+  d3.event.preventDefault();
+
+  var position = d3.mouse(svg.node());
+  //var geoPosition = projection.invert(position);
+
+  var searchRadius = 30;
+
+  var nearTweets = d3.selectAll('circle.tweet').filter(function(tweet) {
+      return (Math.abs(tweet.position[0] - position[0]) < searchRadius &&
+          Math.abs(tweet.position[1] - position[1]) < searchRadius);
+  });
+
+  svg.select('text.tweet')
+      .attr('x',100)
+      .attr('y',50)
+      .style('visibility',function(tweet){
+        var isNear = nearTweets.filter(function(near) {return near.id = tweet.id;});
+        return isNear.empty() ? 'hidden' : 'visible';
+      });
+}
+
+
 /*
   The first time will calculate the graph size.
   The next time will resize the svg element and scale the content to fit.
 */
 function resizeGraph(){
-    realWidth = document.body.clientWidth;
-    width = realWidth - 420;
-    height = width;
 
-    if (width < 420)
-    {
-        width = realWidth;
-        height = width;
-    }
-    else
-    {
-        height = width;
-    }
+    width = window.innerWidth;
+    height = window.innerHeight;
 
     if (originalWidth === null)
     {
@@ -174,15 +187,24 @@ function resizeGraph(){
   remove the data.
   Also, some time limits to calculate the opacity.
 */
-function renderData()
+function renderData(data)
 {
+    svg.selectAll('text')
+      .data(data, function (tweet) { return tweet._id; })
+        .enter()
+          .append('text')
+          .attr('class',function(tweet){return 'tweet id_'+tweet.id_str;})
+          .text(function(tweet){return tweet.text;})
+          .style('visibility','hidden');
+
     var circles = svg
-      .selectAll("circle")
-        .data(getTweets().fetch(), function (tweet) { return tweet._id; });
+      .selectAll("circle.tweet")
+        .data(data, function (tweet) { return tweet._id; });
 
     var nowStamp = (new Date()).getTime();
 
     circles.enter().append("circle")
+        .classed('tweet', true)
         .attr("fill", "rgb(255,0,0)")
         .attr("r", 0)
         .transition()
@@ -208,11 +230,11 @@ function renderData()
         })
         .attr("cy", function(d) { return d.position[1]; })
         .attr("fill-opacity", function(t){
-            
+
             /*
               Calculates the opacity as a percentaje of the age of the tweet over it lifetime (3 hours).
             */
-          
+
             return 1 - ((nowStamp - t.created_at_stamp) / (180 * 60 * 1000));
 
         });
@@ -227,7 +249,7 @@ function renderData()
   Equations based on NOAA’s Solar Calculator; all angles in radians.
   http://www.esrl.noaa.gov/gmd/grad/solcalc/
 
-  BEGIN OF MAGIC 
+  BEGIN OF MAGIC
 */
 
 function antipode(position) {
