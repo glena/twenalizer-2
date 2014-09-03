@@ -147,11 +147,11 @@ function mousemove() {
           Math.abs(tweet.position[1] - position[1]) < searchRadius);
   });
 
-  svg.select('text.tweet')
+  svg.selectAll('text.tweet')
       .attr('x',100)
       .attr('y',50)
       .style('visibility',function(tweet){
-        var isNear = nearTweets.filter(function(near) {return near.id = tweet.id;});
+        var isNear = nearTweets.filter(function(near) { return near.id == tweet.id; });
         return isNear.empty() ? 'hidden' : 'visible';
       });
 }
@@ -193,9 +193,10 @@ function renderData(data)
       .data(data, function (tweet) { return tweet._id; })
         .enter()
           .append('text')
-          .attr('class',function(tweet){return 'tweet id_'+tweet.id_str;})
-          .text(function(tweet){return tweet.text;})
-          .style('visibility','hidden');
+            .attr('class',function(tweet){return 'tweet id_'+tweet.id_str;})
+            .style('visibility','hidden')
+            .text(function(tweet){return tweet.text;})
+            .call(wrap, 500);
 
     var circles = svg
       .selectAll("circle.tweet")
@@ -204,6 +205,19 @@ function renderData(data)
     var nowStamp = (new Date()).getTime();
 
     circles.enter().append("circle")
+        .each(function(d){
+          /*
+            This calculates the position of the circles on the map applying the
+            projection. Not sure if it is better to make it here (I think not)
+            but I don't like to make a foreach before loading the tweets. Maybe
+            add the method to the model, but how to work with the projection
+            as long as this is not defined on the server.
+          */
+          d.position = projection(d.coordinates.coordinates);
+        })
+        .attr("cx", function(d) { return d.position[0]; })
+        .attr("cy", function(d) { return d.position[1]; })
+
         .classed('tweet', true)
         .attr("fill", "rgb(255,0,0)")
         .attr("r", 0)
@@ -217,18 +231,6 @@ function renderData(data)
         .remove();
 
     circles
-        .attr("cx", function(d) {
-          /*
-            This calculates the position of the circles on the map applying the
-            projection. Not sure if it is better to make it here (I think not)
-            but I don't like to make a foreach before loading the tweets. Maybe
-            add the method to the model, but how to work with the projection
-            as long as this is not defined on the server.
-          */
-          d.position = projection(d.coordinates.coordinates);
-          return d.position[0];
-        })
-        .attr("cy", function(d) { return d.position[1]; })
         .attr("fill-opacity", function(t){
 
             /*
@@ -239,6 +241,35 @@ function renderData(data)
 
         });
 
+}
+
+/*
+  Wraps the text to enable multiline text svg elements.
+  Code from http://bl.ocks.org/mbostock/7555321
+*/
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        dy = text.attr("dy") ? parseFloat(text.attr("dy")) : 0,
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
 }
 
 /*
