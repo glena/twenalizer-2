@@ -39,7 +39,7 @@ Meteor.startup(function () {
     the api rate limits for a while (more info here
       https://dev.twitter.com/docs/rate-limiting/1.1)
   */
-  //twitterConnection(datasets[0].name);
+  twitterConnection(datasets[0].name);
 
 });
 

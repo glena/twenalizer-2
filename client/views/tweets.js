@@ -1,4 +1,4 @@
-var circle = d3.geo.circle().angle(90)
+circle = d3.geo.circle().angle(90)
   , width = null
   , originalWidth = null
   , height = 0
@@ -143,8 +143,9 @@ function mousemove() {
   var searchRadius = 30;
 
   var nearTweets = d3.selectAll('circle.tweet').filter(function(tweet) {
-      return (Math.abs(tweet.position[0] - position[0]) < searchRadius &&
-          Math.abs(tweet.position[1] - position[1]) < searchRadius);
+      var tPosition = projection(tweet.coordinates.coordinates);
+      return (Math.abs(tPosition[0] - position[0]) < searchRadius &&
+          Math.abs(tPosition[1] - position[1]) < searchRadius);
   });
 
   svg.selectAll('text.tweet')
